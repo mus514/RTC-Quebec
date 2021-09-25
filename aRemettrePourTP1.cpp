@@ -116,25 +116,25 @@ void DonneesGTFS::ajouterServices(const std::string &p_nomFichier)
     string ligneFichier;
     vector<string> temp;
 
-    while (getline(ifs, ligneFichier))
-    {
+    while (getline(ifs, ligneFichier)) {
         // Enlever les "" du string
         ligneFichier.erase(remove(ligneFichier.begin(), ligneFichier.end(), '"'), ligneFichier.end());
         temp = string_to_vector(ligneFichier, ',');
 
         // Ajouter au m_service valuers et verifier si la date correspond au m_date et que exception == "1"
-        if(Date(stoi(temp.at(1).substr(0, 4)),
-                stoi(temp.at(1).substr(4, 2)),
-                stoi(temp.at(1).substr(6, 2))) == m_date & temp.at(2) == "1")
-
-        {
+        if (Date(stoi(temp.at(1).substr(0, 4)),
+                 stoi(temp.at(1).substr(4, 2)),
+                 stoi(temp.at(1).substr(6, 2))) == m_date & temp.at(2) == "1") {
             m_services.insert(temp.at(0));
+
         }
-        
+
         // supprimer les elements deja utliser.
         temp.clear();
     }
-
+    
+    // Fermer le fichier ouvert
+    ifs.close();
 }
 
 //! \brief ajoute les voyages de la date
