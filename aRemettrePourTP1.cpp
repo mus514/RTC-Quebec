@@ -67,7 +67,7 @@ void DonneesGTFS::ajouterStations(const std::string &p_nomFichier)
         ligneFichier.erase(remove(ligneFichier.begin(), ligneFichier.end(), '"'), ligneFichier.end());
         temp = string_to_vector(ligneFichier, ',');
 
-        // Ajouter au m_ligne les cles et leurs valuers
+        // Ajouter au m_station les cles et leurs valuers
 
         m_stations.insert(pair<unsigned int, Station>(stoi(temp.at(0)),
                                                       Station(stoi(temp.at(0)),
@@ -82,9 +82,9 @@ void DonneesGTFS::ajouterStations(const std::string &p_nomFichier)
 
     // Fermer le fichier ouvert
     ifs.close();
-
-
 }
+
+
 
 //! \brief ajoute les transferts dans l'objet GTFS
 //! \breif Cette méthode doit âtre utilisée uniquement après que tous les arrêts ont été ajoutés
@@ -107,8 +107,33 @@ void DonneesGTFS::ajouterTransferts(const std::string &p_nomFichier)
 //! \throws logic_error si un problème survient avec la lecture du fichier
 void DonneesGTFS::ajouterServices(const std::string &p_nomFichier)
 {
+    ifstream ifs(p_nomFichier, ios::in);
+    if (!ifs) {
+        throw logic_error("Le fichier n'existe pas");
+    }
+    string premiereLigne;
+    getline(ifs, premiereLigne);
+    string ligneFichier;
+    vector<string> temp;
 
-//écrire votre code ici
+    while (getline(ifs, ligneFichier))
+    {
+        // Enlever les "" du string
+        ligneFichier.erase(remove(ligneFichier.begin(), ligneFichier.end(), '"'), ligneFichier.end());
+        temp = string_to_vector(ligneFichier, ',');
+
+        // Ajouter au m_service valuers et verifier si la date correspond au m_date et que exception == "1"
+        if(Date(stoi(temp.at(1).substr(0, 4)),
+                stoi(temp.at(1).substr(4, 2)),
+                stoi(temp.at(1).substr(6, 2))) == m_date & temp.at(2) == "1")
+
+        {
+            m_services.insert(temp.at(0));
+        }
+        
+        // supprimer les elements deja utliser.
+        temp.clear();
+    }
 
 }
 
