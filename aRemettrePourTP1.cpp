@@ -2,6 +2,11 @@
 // Created by Mario Marchand on 16-12-29.
 //
 
+//
+// Mustapha BOUHSEN
+// TP-1
+//
+
 #include "DonneesGTFS.h"
 #include <algorithm>
 #include <iostream>
@@ -183,8 +188,7 @@ void DonneesGTFS::ajouterVoyagesDeLaDate(const std::string &p_nomFichier)
 //! \param[in] p_nomFichier: le nom du fichier contenant les arrets
 //! \post assigne m_tousLesArretsPresents à true
 //! \throws logic_error si un problème survient avec la lecture du fichier
-void DonneesGTFS::ajouterArretsDesVoyagesDeLaDate(const std::string &p_nomFichier)
-{
+void DonneesGTFS::ajouterArretsDesVoyagesDeLaDate(const std::string &p_nomFichier) {
     ifstream ifs(p_nomFichier, ios::in);
     if (!ifs) {
         throw logic_error("Le fichier n'existe pas");
@@ -201,30 +205,61 @@ void DonneesGTFS::ajouterArretsDesVoyagesDeLaDate(const std::string &p_nomFichie
         ligneFichier.erase(remove(ligneFichier.begin(), ligneFichier.end(), '"'), ligneFichier.end());
         temp = string_to_vector(ligneFichier, ',');
 
-        Heure debut = Heure(stoi(temp.at(1).substr(0,2)),
-                            stoi(temp.at(1).substr(3,2)),
-                            stoi(temp.at(1).substr(6,2)));
+        Heure debut = Heure(stoi(temp.at(1).substr(0, 2)),
+                            stoi(temp.at(1).substr(3, 2)),
+                            stoi(temp.at(1).substr(6, 2)));
 
-        Heure fin = Heure(stoi(temp.at(2).substr(0,2)),
-                          stoi(temp.at(2).substr(3,2)),
-                          stoi(temp.at(2).substr(6,2)));
+        Heure fin = Heure(stoi(temp.at(2).substr(0, 2)),
+                          stoi(temp.at(2).substr(3, 2)),
+                          stoi(temp.at(2).substr(6, 2)));
 
-        if(m_voyages.find(temp.at(0)) != m_voyages.end() & m_now1 <=  debut & m_now2 > fin)
-        {
-            Arret::Ptr a_ptr = make_shared<Arret>(stoi(temp.at(3)),debut, fin,
-                                                  stoi(temp.at(4)),temp.at(0));
+        if (m_voyages.find(temp.at(0)) != m_voyages.end() && m_now1 <= debut && m_now2 > fin) {
+            Arret::Ptr a_ptr = make_shared<Arret>(stoi(temp.at(3)), debut, fin,
+                                                  stoi(temp.at(4)), temp.at(0));
 
-           m_voyages[temp.at(0)].ajouterArret(a_ptr);
+            // Ajout des arret a Voyage
+            m_voyages[temp.at(0)].ajouterArret(a_ptr);
 
-           m_nbArrets +=1;
+            // Ajout des arret a Station
+            m_stations[a_ptr->getStationId()].addArret(a_ptr);
+
+            m_nbArrets += 1;
         }
 
         // supprimer les elements deja utliser
         temp.clear();
     }
 
+    // Supprimer Voyages qui n'ont pas d'arret
+    map<string, Voyage>::iterator i;
+    i = m_voyages.begin();
+    while (i != m_voyages.end())
+    {
+        if(i->second.getArrets().empty())
+        {
+            m_voyages.erase(i->first);
+            i = m_voyages.begin();
+        }
+        else
+            i++;
+    }
 
+    // Supprimer Stations qui n'ont pas d'arret
+    map<unsigned int, Station>::iterator j;
+    j = m_stations.begin();
+    while (j != m_stations.end())
+    {
+        if(j->second.getArrets().empty())
+        {
+            m_stations.erase(j->first);
+            j = m_stations.begin();
+        }
+        else
+            j++;
+    }
 
+    // Modifier m_touLesArretsPresents
+    m_tousLesArretsPresents = true;
 
     // Fermer le fichier ouvert
     ifs.close();
