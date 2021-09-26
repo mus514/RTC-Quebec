@@ -132,7 +132,7 @@ void DonneesGTFS::ajouterServices(const std::string &p_nomFichier)
         // supprimer les elements deja utliser.
         temp.clear();
     }
-    
+
     // Fermer le fichier ouvert
     ifs.close();
 }
@@ -143,9 +143,32 @@ void DonneesGTFS::ajouterServices(const std::string &p_nomFichier)
 //! \throws logic_error si un problème survient avec la lecture du fichier
 void DonneesGTFS::ajouterVoyagesDeLaDate(const std::string &p_nomFichier)
 {
+    ifstream ifs(p_nomFichier, ios::in);
+    if (!ifs) {
+        throw logic_error("Le fichier n'existe pas");
+    }
+    string premiereLigne;
+    getline(ifs, premiereLigne);
+    string ligneFichier;
+    vector<string> temp;
 
-//écrire votre code ici
+    while (getline(ifs, ligneFichier)) {
 
+        // Enlever les "" du string
+        ligneFichier.erase(remove(ligneFichier.begin(), ligneFichier.end(), '"'), ligneFichier.end());
+        temp = string_to_vector(ligneFichier, ',');
+
+        if(m_services.find(temp.at(1)) != m_services.end())
+        {
+            m_voyages.insert(pair<string, Voyage>(temp.at(2) ,
+                                                  Voyage(temp.at(2),
+                                                         stoi(temp.at(0)), temp.at(1),
+                                                         temp.at(3))));
+        }
+        temp.clear();
+    }
+
+    ifs.close();
 }
 
 //! \brief ajoute les arrets aux voyages présents dans le GTFS si l'heure du voyage appartient à l'intervalle de temps du GTFS
