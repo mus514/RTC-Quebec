@@ -19,12 +19,15 @@ using namespace std;
 //! \throws logic_error si un problème survient avec la lecture du fichier
 void DonneesGTFS::ajouterLignes(const std::string &p_nomFichier) {
 
+    // Ouverture du fichier et lancer une exeption si un echec
     ifstream ifs(p_nomFichier, ios::in);
     if (!ifs) {
         throw logic_error("Le fichier n'existe pas");
     }
+    // Pour enlever la premiere ligne
     string premiereLigne;
     getline(ifs, premiereLigne);
+
     string ligneFichier;
     vector<string> temp;
 
@@ -42,7 +45,7 @@ void DonneesGTFS::ajouterLignes(const std::string &p_nomFichier) {
 
         // Ajouter au m_ligne les cles et leurs valuers
         m_lignes_par_numero.insert(pair<string , Ligne>(temp.at(2),
-                                                        Ligne(stoi(temp.at(0)),temp.at(0),
+                                                        Ligne(stoi(temp.at(0)),temp.at(2),
                                                               temp.at(4),
                                                               Ligne::couleurToCategorie(temp.at(7)))));
 
@@ -59,12 +62,15 @@ void DonneesGTFS::ajouterLignes(const std::string &p_nomFichier) {
 //! \throws logic_error si un problème survient avec la lecture du fichier
 void DonneesGTFS::ajouterStations(const std::string &p_nomFichier)
 {
+    // Ouverture du fichier et lancer une exeption si un echec
     ifstream ifs(p_nomFichier, ios::in);
     if (!ifs) {
         throw logic_error("Le fichier n'existe pas");
     }
+    // Pour enlever la premiere ligne
     string premiereLigne;
     getline(ifs, premiereLigne);
+
     string ligneFichier;
     vector<string> temp;
 
@@ -75,13 +81,11 @@ void DonneesGTFS::ajouterStations(const std::string &p_nomFichier)
         temp = string_to_vector(ligneFichier, ',');
 
         // Ajouter au m_station les cles et leurs valuers
-
         m_stations.insert(pair<unsigned int, Station>(stoi(temp.at(0)),
                                                       Station(stoi(temp.at(0)),
                                                               temp.at(1),temp.at(2),
                                                               Coordonnees(stod(temp.at(3)),
                                                                           stod(temp.at(4))))));
-
 
         // supprimer les elements deja utliser.
         temp.clear();
@@ -103,17 +107,21 @@ void DonneesGTFS::ajouterStations(const std::string &p_nomFichier)
 //! \throws logic_error si tous les arrets de la date et de l'intervalle n'ont pas été ajoutés
 void DonneesGTFS::ajouterTransferts(const std::string &p_nomFichier)
 {
+    // Ouverture du fichier et lancer une exeption si un echec
     ifstream ifs(p_nomFichier, ios::in);
     if (!ifs)
     {
         throw logic_error("Le fichier n'existe pas");
     }
 
+    // lancer une exeption si pas tout les arrets existe
     if(!m_tousLesArretsPresents)
         throw logic_error("Le fichier n'existe pas");
 
+    // Pour enlever la premiere ligne
     string premiereLigne;
     getline(ifs, premiereLigne);
+
     string ligneFichier;
     vector<string> temp;
 
@@ -123,6 +131,7 @@ void DonneesGTFS::ajouterTransferts(const std::string &p_nomFichier)
         ligneFichier.erase(remove(ligneFichier.begin(), ligneFichier.end(), '"'), ligneFichier.end());
         temp = string_to_vector(ligneFichier, ',');
 
+        // Changer 0 en 1 et conversion en int
         int sec;
         {
             if (stoi(temp.at(3)) == 0)
@@ -131,6 +140,7 @@ void DonneesGTFS::ajouterTransferts(const std::string &p_nomFichier)
                 sec = stoi(temp.at(3));
         }
 
+        // Verifier si tous les arrets sont presents
         if(m_tousLesArretsPresents)
         {
             if(m_stations.find(stoi(temp.at(0))) != m_stations.end() &&
@@ -156,12 +166,16 @@ void DonneesGTFS::ajouterTransferts(const std::string &p_nomFichier)
 //! \throws logic_error si un problème survient avec la lecture du fichier
 void DonneesGTFS::ajouterServices(const std::string &p_nomFichier)
 {
+    // Ouverture du fichier et lancer une exeption si un echec
     ifstream ifs(p_nomFichier, ios::in);
     if (!ifs) {
         throw logic_error("Le fichier n'existe pas");
     }
+
+    // Pour enlever la premiere ligne
     string premiereLigne;
     getline(ifs, premiereLigne);
+
     string ligneFichier;
     vector<string> temp;
 
@@ -192,10 +206,14 @@ void DonneesGTFS::ajouterServices(const std::string &p_nomFichier)
 //! \throws logic_error si un problème survient avec la lecture du fichier
 void DonneesGTFS::ajouterVoyagesDeLaDate(const std::string &p_nomFichier)
 {
+
+    // Ouverture du fichier et lancer une exeption si un echec
     ifstream ifs(p_nomFichier, ios::in);
     if (!ifs) {
         throw logic_error("Le fichier n'existe pas");
     }
+
+    // Pour enlever la premiere ligne
     string premiereLigne;
     getline(ifs, premiereLigne);
     string ligneFichier;
@@ -232,14 +250,18 @@ void DonneesGTFS::ajouterVoyagesDeLaDate(const std::string &p_nomFichier)
 //! \param[in] p_nomFichier: le nom du fichier contenant les arrets
 //! \post assigne m_tousLesArretsPresents à true
 //! \throws logic_error si un problème survient avec la lecture du fichier
-void DonneesGTFS::ajouterArretsDesVoyagesDeLaDate(const std::string &p_nomFichier) {
+void DonneesGTFS::ajouterArretsDesVoyagesDeLaDate(const std::string &p_nomFichier)
+{
+    // Ouverture du fichier et lancer une exeption si un echec
     ifstream ifs(p_nomFichier, ios::in);
     if (!ifs) {
         throw logic_error("Le fichier n'existe pas");
     }
 
+    // Pour enlever la premiere ligne
     string premiereLigne;
     getline(ifs, premiereLigne);
+
     string ligneFichier;
     vector<string> temp;
 
@@ -257,6 +279,7 @@ void DonneesGTFS::ajouterArretsDesVoyagesDeLaDate(const std::string &p_nomFichie
                           stoi(temp.at(2).substr(3, 2)),
                           stoi(temp.at(2).substr(6, 2)));
 
+        // Trier selon les heures
         if (m_voyages.find(temp.at(0)) != m_voyages.end() && m_now1 <= debut && m_now2 > fin) {
             Arret::Ptr a_ptr = make_shared<Arret>(stoi(temp.at(3)), debut, fin,
                                                   stoi(temp.at(4)), temp.at(0));
