@@ -103,8 +103,50 @@ void DonneesGTFS::ajouterStations(const std::string &p_nomFichier)
 //! \throws logic_error si tous les arrets de la date et de l'intervalle n'ont pas été ajoutés
 void DonneesGTFS::ajouterTransferts(const std::string &p_nomFichier)
 {
+    ifstream ifs(p_nomFichier, ios::in);
+    if (!ifs)
+    {
+        throw logic_error("Le fichier n'existe pas");
+    }
 
-//écrire votre code ici
+    if(!m_tousLesArretsPresents)
+        throw logic_error("Le fichier n'existe pas");
+
+    string premiereLigne;
+    getline(ifs, premiereLigne);
+    string ligneFichier;
+    vector<string> temp;
+
+    while (getline(ifs, ligneFichier))
+    {
+        // Enlever les "" du string
+        ligneFichier.erase(remove(ligneFichier.begin(), ligneFichier.end(), '"'), ligneFichier.end());
+        temp = string_to_vector(ligneFichier, ',');
+
+        int sec;
+        {
+            if (stoi(temp.at(3)) == 0)
+                sec = 1;
+            else
+                sec = stoi(temp.at(3));
+        }
+
+        if(m_tousLesArretsPresents)
+        {
+            if(m_stations.find(stoi(temp.at(0))) != m_stations.end() &&
+                    m_stations.find(stoi(temp.at(1))) != m_stations.end())
+            {
+                m_transferts.emplace_back(make_tuple(stoi(temp.at(0)),stoi(temp.at(1)), sec));
+                m_stationsDeTransfert.insert(stoi(temp.at(0)));
+            }
+        }
+
+        // supprimer les elements deja utliser.
+        temp.clear();
+    }
+
+    // Fermer le fichier ouvert
+    ifs.close();
 
 }
 
@@ -164,6 +206,8 @@ void DonneesGTFS::ajouterVoyagesDeLaDate(const std::string &p_nomFichier)
         // Enlever les "" du string
         ligneFichier.erase(remove(ligneFichier.begin(), ligneFichier.end(), '"'), ligneFichier.end());
         temp = string_to_vector(ligneFichier, ',');
+
+
 
         if(m_services.find(temp.at(1)) != m_services.end())
         {
@@ -244,7 +288,7 @@ void DonneesGTFS::ajouterArretsDesVoyagesDeLaDate(const std::string &p_nomFichie
             i++;
     }
 
-    // Supprimer Stations qui n'ont pas d'arret
+    //Supprimer Stations qui n'ont pas d'arret
     map<unsigned int, Station>::iterator j;
     j = m_stations.begin();
     while (j != m_stations.end())
