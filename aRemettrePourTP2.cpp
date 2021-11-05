@@ -357,75 +357,7 @@ void ReseauGTFS::ajouterArcsOrigineDestination(const DonneesGTFS &p_gtfs, const 
 //    m_nbArcsOrigineVersStations = 0;
 //    m_nbArcsStationsVersDestination = 0;
 
-//    if (m_origine_dest_ajoute == true){
-//        throw logic_error("Des arcs d'origine sont déjà présents dans le graphe");
-//    }
-//
-//    const Heure heureDepart = p_gtfs.getTempsDebut();
-//    m_nbArcsStationsVersDestination = 0;
-//    m_nbArcsOrigineVersStations = 0;
-//
-//    // On crée des Arrets pointeurs pour l'origine et la destination
-//    Arret::Ptr pointOrigine = make_shared<Arret>(stationIdOrigine, heureDepart, Heure(2, 0, 0), 0, "ORIGINE");
-//    Arret::Ptr pointDestination = make_shared<Arret>(stationIdDestination, heureDepart, Heure(2, 0, 0), 0,
-//                                                     "DESTINATION");
-//
-//    m_leGraphe.resize(m_leGraphe.getNbSommets() + 2);
-//
-//    m_sommetOrigine = m_leGraphe.getNbSommets() - 2;
-//    m_sommetDestination = m_leGraphe.getNbSommets() - 1;
-//
-//    // Ajouts des sommets dans le graphe
-//    m_arretDuSommet.push_back(pointOrigine);
-//    m_arretDuSommet.push_back(pointDestination);
-//
-//    m_sommetDeArret.insert({pointOrigine, m_sommetOrigine});
-//    m_sommetDeArret.insert({pointDestination, m_sommetDestination});
-//
-//
-//    const map<unsigned int, Station> &m_stations = p_gtfs.getStations();
-//
-//    for (auto station = m_stations.begin(); station != m_stations.end(); ++station) {
-//        const Coordonnees &coordStation = station->second.getCoords();
-//
-//        double distanceMarcheOrigine = p_pointOrigine - coordStation;
-//        double distanceMarcheDestination = p_pointDestination - coordStation;
-//
-//        if (distanceMarcheOrigine < distanceMaxMarche) {
-//            const multimap<Heure, Arret::Ptr> &arretsStation = station->second.getArrets();
-//
-//            unsigned int secondesMarche = ((distanceMarcheOrigine / vitesseDeMarche) * 3600);
-//            Heure tempsMarcheOrigine = heureDepart.add_secondes(secondesMarche);
-//
-//            multimap<Heure, Arret::Ptr>::const_iterator arretAccessible = arretsStation.lower_bound(tempsMarcheOrigine);
-//
-//            if (arretAccessible != arretsStation.end()) {
-//                m_leGraphe.ajouterArc(m_sommetOrigine, m_sommetDeArret[(*arretAccessible).second],
-//                                      (*arretAccessible).first - heureDepart);
-//                ++m_nbArcsOrigineVersStations;
-//            }
-//        }
-//        if (distanceMarcheDestination < distanceMaxMarche) {
-//            const multimap<Heure, Arret::Ptr> &arretsStation = station->second.getArrets();
-//
-//            unsigned int tempsMarcheDestination = (distanceMarcheDestination / vitesseDeMarche) * 3600;
-//
-//            for (auto arret = arretsStation.begin(); arret != arretsStation.end(); ++arret) {
-//                size_t sommetArret = m_sommetDeArret[(*arret).second];
-//
-//                m_leGraphe.ajouterArc(sommetArret, m_sommetDestination, tempsMarcheDestination);
-//                m_sommetsVersDestination.push_back(sommetArret);
-//                ++m_nbArcsStationsVersDestination;
-//            }
-//        }
-//    }
-//
-//    if (m_nbArcsStationsVersDestination == 0 or m_nbArcsOrigineVersStations == 0){
-//        throw logic_error("Aucun arrêt de bus n'est dans le rayon maximal de marche de la destination ou de l'origine");
-//    }
-//
-//    // On indique que que les arcs origine/destination ont été ajoutés
-//    m_origine_dest_ajoute = true;
+
 
 }
 
@@ -437,32 +369,7 @@ void ReseauGTFS::ajouterArcsOrigineDestination(const DonneesGTFS &p_gtfs, const 
 //! \post enlève les données de m_sommetsVersDestination
 void ReseauGTFS::enleverArcsOrigineDestination()
 {
-//    if (m_origine_dest_ajoute == false) {
-//        throw logic_error("Il n'y a pas d'arcs d'origine et de destination dans le graphe");
-//    }
-//
-//    for (auto sommet = m_sommetsVersDestination.begin(); sommet != m_sommetsVersDestination.end(); ++sommet) {
-//        m_leGraphe.enleverArc(*sommet, m_sommetDestination);
-//    }
-//    m_leGraphe.resize(m_leGraphe.getNbSommets() - 2);
-//
-//    // Allons chercher les pointeurs des sommets Origine et Destination
-//    Arret::Ptr sommetOrigine = m_arretDuSommet[m_sommetOrigine];
-//    Arret::Ptr sommetDestination = m_arretDuSommet[m_sommetDestination];
-//
-//    // Suppression m_sommetDeArret
-//    m_sommetDeArret.erase(sommetOrigine);
-//    m_sommetDeArret.erase(sommetDestination);
-//
-//    // Suppression des sommets dans m_arretDuSommet
-//    m_arretDuSommet.pop_back();
-//    m_arretDuSommet.pop_back();
-//
-//    // Mise à jour des paramètres du graphe
-//    m_nbArcsOrigineVersStations = 0;
-//    m_nbArcsStationsVersDestination = 0;
-//    m_sommetsVersDestination.clear();
-//    m_origine_dest_ajoute = false;
+
 }
 
 
