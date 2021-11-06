@@ -10,29 +10,24 @@ using namespace std;
 //! \brief ajout des arcs dus aux voyages
 //! \brief insère les arrêts (associés aux sommets) dans m_arretDuSommet et m_sommetDeArret
 //! \throws logic_error si une incohérence est détecté lors de cette étape de construction du graphe
-void ReseauGTFS::ajouterArcsVoyages(const DonneesGTFS & p_gtfs)
-{
-    if(m_arretDuSommet.size() != 0)
+void ReseauGTFS::ajouterArcsVoyages(const DonneesGTFS &p_gtfs) {
+    if (m_arretDuSommet.size() != 0)
         throw logic_error("Le graphe est deja remplie");
 
     size_t taille = m_arretDuSommet.size();
 
     auto voyage = p_gtfs.getVoyages();
 
-    for(auto i = voyage.begin(); i != voyage.end(); i++)
-    {
+    for (auto i = voyage.begin(); i != voyage.end(); i++) {
         auto arret = i->second.getArrets();
-        for(auto j = arret.begin(); j != arret.end(); j++)
-        {
-            m_sommetDeArret.insert({*j,taille});
+        for (auto j = arret.begin(); j != arret.end(); j++) {
+            m_sommetDeArret.insert({*j, taille});
             m_arretDuSommet.push_back(*j);
             ++taille;
         }
 
-        for(auto j = arret.begin(); j != arret.end(); j++)
-        {
-            if(j != arret.begin())
-            {
+        for (auto j = arret.begin(); j != arret.end(); j++) {
+            if (j != arret.begin()) {
                 auto temp = j;
                 --temp;
                 size_t precedent = m_sommetDeArret[*temp];
@@ -47,15 +42,14 @@ void ReseauGTFS::ajouterArcsVoyages(const DonneesGTFS & p_gtfs)
 
 //! \brief ajouts des arcs dus aux transferts entre stations
 //! \throws logic_error si une incohérence est détecté lors de cette étape de construction du graphe
-void ReseauGTFS::ajouterArcsTransferts(const DonneesGTFS & p_gtfs)
-{
-    if(m_arretDuSommet.size() == 0)
+void ReseauGTFS::ajouterArcsTransferts(const DonneesGTFS &p_gtfs) {
+    if (m_arretDuSommet.size() == 0)
         throw logic_error("Le graphe est deja remplie");
 
     map<Arret::Ptr, vector<Arret::Ptr>> conteneur_temp;
     vector<Arret::Ptr> vecteur_temp_to;
     vector<string> vecteur_ligne;
-    for(auto i = p_gtfs.getTransferts().begin(); i != p_gtfs.getTransferts().end(); i++) {
+    for (auto i = p_gtfs.getTransferts().begin(); i != p_gtfs.getTransferts().end(); i++) {
         int from = get<0>(*i);
         int to = get<1>(*i);
         int minTemps = get<2>(*i);
@@ -74,14 +68,12 @@ void ReseauGTFS::ajouterArcsTransferts(const DonneesGTFS & p_gtfs)
                 auto ligne_to = p_gtfs.getLignes().find(
                         p_gtfs.getVoyages().find(k->second->getVoyageId())->second.getLigne())->second.getNumero();
 
-                for (auto l = vecteur_ligne.begin(); l != vecteur_ligne.end(); l++)
-                {
+                for (auto l = vecteur_ligne.begin(); l != vecteur_ligne.end(); l++) {
                     if (ligne_to == *l)
                         present = true;
                 }
 
-                if (!present & (ligne_to != ligne_from))
-                {
+                if (!present & (ligne_to != ligne_from)) {
                     vecteur_temp_to.push_back((*k).second);
                     vecteur_ligne.push_back(ligne_to);
                 }
@@ -106,23 +98,20 @@ void ReseauGTFS::ajouterArcsTransferts(const DonneesGTFS & p_gtfs)
 
 //! \brief ajouts des arcs d'une station à elle-même pour les stations qui ne sont pas dans DonneesGTFS::m_stationsDeTransfert
 //! \throws logic_error si une incohérence est détecté lors de cette étape de construction du graphe
-void ReseauGTFS::ajouterArcsAttente(const DonneesGTFS & p_gtfs)
-{
-    if(m_arretDuSommet.size() == 0)
+void ReseauGTFS::ajouterArcsAttente(const DonneesGTFS &p_gtfs) {
+    if (m_arretDuSommet.size() == 0)
         throw logic_error("Le graphe est deja remplie");
 
     map<unsigned int, Station> station_sans_transfer;
-    for(auto i = p_gtfs.getStations().begin(); i != p_gtfs.getStations().end(); i++)
-    {
+    for (auto i = p_gtfs.getStations().begin(); i != p_gtfs.getStations().end(); i++) {
         bool present = false;
-        for(auto j = p_gtfs.getStationsDeTransfert().begin(); j != p_gtfs.getStationsDeTransfert().end(); j++)
-        {
-            if(i->first == *j)
+        for (auto j = p_gtfs.getStationsDeTransfert().begin(); j != p_gtfs.getStationsDeTransfert().end(); j++) {
+            if (i->first == *j)
                 present = true;
 
         }
 
-        if(!present)
+        if (!present)
             station_sans_transfer.insert({i->first, i->second});
     }
 
@@ -130,24 +119,22 @@ void ReseauGTFS::ajouterArcsAttente(const DonneesGTFS & p_gtfs)
     vector<Arret::Ptr> tempo;
     vector<string> vecteur_ligne;
 
-    for(auto i = station_sans_transfer.begin(); i != station_sans_transfer.end(); i++)
-    {
-        for(auto j = i->second.getArrets().begin(); j != i->second.getArrets().end(); j++)
-        {
+    for (auto i = station_sans_transfer.begin(); i != station_sans_transfer.end(); i++) {
+        for (auto j = i->second.getArrets().begin(); j != i->second.getArrets().end(); j++) {
             auto k = j;
             ++k;
-            auto ligne_1 = p_gtfs.getLignes().find(p_gtfs.getVoyages().find(j->second->getVoyageId())->second.getLigne())->second.getNumero();
-            for(;k != i->second.getArrets().end(); k++)
-            {
-                auto ligne_2 = p_gtfs.getLignes().find(p_gtfs.getVoyages().find(k->second->getVoyageId())->second.getLigne())->second.getNumero();
+            auto ligne_1 = p_gtfs.getLignes().find(
+                    p_gtfs.getVoyages().find(j->second->getVoyageId())->second.getLigne())->second.getNumero();
+            for (; k != i->second.getArrets().end(); k++) {
+                auto ligne_2 = p_gtfs.getLignes().find(
+                        p_gtfs.getVoyages().find(k->second->getVoyageId())->second.getLigne())->second.getNumero();
                 bool prensent = false;
-                for(auto l = vecteur_ligne.begin(); l != vecteur_ligne.end(); l++)
-                {
-                    if((*l) == ligne_2)
+                for (auto l = vecteur_ligne.begin(); l != vecteur_ligne.end(); l++) {
+                    if ((*l) == ligne_2)
                         prensent = true;
                 }
-                if(!prensent & (ligne_1 != ligne_2) & ((k->second->getHeureArrivee() - j->second->getHeureArrivee()) >= delaisMinArcsAttente))
-                {
+                if (!prensent & (ligne_1 != ligne_2) &
+                    ((k->second->getHeureArrivee() - j->second->getHeureArrivee()) >= delaisMinArcsAttente)) {
                     vecteur_ligne.push_back(ligne_2);
                     tempo.push_back((*k).second);
                 }
@@ -157,12 +144,10 @@ void ReseauGTFS::ajouterArcsAttente(const DonneesGTFS & p_gtfs)
             vecteur_ligne.clear();
         }
 
-        for(auto i = conteneur_temp.begin(); i!= conteneur_temp.end(); i++)
-        {
-            for(auto j = i->second.begin(); j != i->second.end(); j++)
-            {
-                auto a =m_sommetDeArret[(*j)];
-                auto de =m_sommetDeArret[(*i).first];
+        for (auto i = conteneur_temp.begin(); i != conteneur_temp.end(); i++) {
+            for (auto j = i->second.begin(); j != i->second.end(); j++) {
+                auto a = m_sommetDeArret[(*j)];
+                auto de = m_sommetDeArret[(*i).first];
                 auto arc = (*j)->getHeureArrivee() - (*i).first->getHeureArrivee();
                 m_leGraphe.ajouterArc(de, a, arc);
             }
@@ -184,13 +169,18 @@ void ReseauGTFS::ajouterArcsAttente(const DonneesGTFS & p_gtfs)
 void ReseauGTFS::ajouterArcsOrigineDestination(const DonneesGTFS &p_gtfs, const Coordonnees &p_pointOrigine,
                                                const Coordonnees &p_pointDestination)
 {
-    Arret::Ptr arret_origine =make_shared<Arret>(stationIdOrigine,
-                                                 Heure(0,0,0),
-                                                 Heure(0,0,0),0,"Origine");
+    if (m_origine_dest_ajoute)
+    {
+        throw logic_error("Les acrs de l'origine sont deja presents dans le graphe");
+    }
 
-    Arret::Ptr arret_destination =make_shared<Arret>(stationIdDestination,
-                                                 Heure(0,0,0),
-                                                 Heure(0,0,0),0,"Origine");
+    Arret::Ptr arret_origine = make_shared<Arret>(stationIdOrigine,
+                                                  Heure(0, 0, 0),
+                                                  Heure(0, 0, 0), 0, "Origine");
+
+    Arret::Ptr arret_destination = make_shared<Arret>(stationIdDestination,
+                                                      Heure(0, 0, 0),
+                                                      Heure(0, 0, 0), 0, "Origine");
 
     m_leGraphe.resize(m_leGraphe.getNbSommets() + 2);
     m_sommetOrigine = m_leGraphe.getNbSommets() - 2;
@@ -204,25 +194,27 @@ void ReseauGTFS::ajouterArcsOrigineDestination(const DonneesGTFS &p_gtfs, const 
 
     vector<Arret::Ptr> vecteur_arret;
     vector<string> vecteur_ligne;
-    for(auto itr_station = p_gtfs.getStations().begin(); itr_station != p_gtfs.getStations().end(); itr_station++)
+    for (auto itr_station = p_gtfs.getStations().begin(); itr_station != p_gtfs.getStations().end(); itr_station++)
     {
-        if(itr_station->second.getCoords() - p_pointOrigine < distanceMaxMarche)
+        if (itr_station->second.getCoords() - p_pointOrigine < distanceMaxMarche)
         {
-            unsigned int temp_marche = ((p_pointOrigine - itr_station->second.getCoords())/vitesseDeMarche) * 3600;
+            unsigned int temp_marche = ((p_pointOrigine - itr_station->second.getCoords()) / vitesseDeMarche) * 3600;
             Heure distance_attente = p_gtfs.getTempsDebut();
-            auto arret_disponible = itr_station->second.getArrets().lower_bound(distance_attente.add_secondes(temp_marche));
+            auto arret_disponible = itr_station->second.getArrets().lower_bound(
+                    distance_attente.add_secondes(temp_marche));
 
-            for(auto j = arret_disponible; j != itr_station->second.getArrets().end(); j++)
+            for (auto j = arret_disponible; j != itr_station->second.getArrets().end(); j++)
             {
-                auto ligne = p_gtfs.getLignes().find(p_gtfs.getVoyages().find(j->second->getVoyageId())->second.getLigne())->second.getNumero();
+                auto ligne = p_gtfs.getLignes().find(
+                        p_gtfs.getVoyages().find(j->second->getVoyageId())->second.getLigne())->second.getNumero();
                 bool prensent = false;
 
-                for(auto l = vecteur_ligne.begin(); l != vecteur_ligne.end(); l++)
+                for (auto l = vecteur_ligne.begin(); l != vecteur_ligne.end(); l++)
                 {
-                    if((*l) == ligne)
+                    if ((*l) == ligne)
                         prensent = true;
                 }
-                if(!prensent)
+                if (!prensent)
                 {
                     vecteur_ligne.push_back(ligne);
                     vecteur_arret.push_back((*j).second);
@@ -230,7 +222,7 @@ void ReseauGTFS::ajouterArcsOrigineDestination(const DonneesGTFS &p_gtfs, const 
 
             }
 
-            for(auto i = vecteur_arret.begin(); i!= vecteur_arret.end(); i++)
+            for (auto i = vecteur_arret.begin(); i != vecteur_arret.end(); i++)
             {
                 unsigned int arc = (*i)->getHeureArrivee() - p_gtfs.getTempsDebut();
                 m_leGraphe.ajouterArc(m_sommetOrigine, m_sommetDeArret[*i], arc);
@@ -241,94 +233,18 @@ void ReseauGTFS::ajouterArcsOrigineDestination(const DonneesGTFS &p_gtfs, const 
             vecteur_ligne.clear();
         }
 
-        if(itr_station->second.getCoords() - p_pointDestination < distanceMaxMarche)
+        if (itr_station->second.getCoords() - p_pointDestination < distanceMaxMarche)
         {
-            for(auto i = itr_station->second.getArrets().begin(); i != itr_station->second.getArrets().end(); i++)
+            for (auto i = itr_station->second.getArrets().begin(); i != itr_station->second.getArrets().end(); i++)
             {
-                unsigned int arc = ((p_pointDestination - itr_station->second.getCoords())/vitesseDeMarche) * 3600;
+                unsigned int arc = ((p_pointDestination - itr_station->second.getCoords()) / vitesseDeMarche) * 3600;
                 m_leGraphe.ajouterArc(m_sommetDeArret[i->second], m_sommetDestination, arc);
                 m_sommetsVersDestination.push_back(m_sommetDeArret[i->second]);
                 ++m_nbArcsStationsVersDestination;
-
             }
         }
     }
     m_origine_dest_ajoute = true;
-
-
-
-
-
-
-//    if (m_origine_dest_ajoute == true){
-//        throw logic_error("Des arcs d'origine sont déjà présents dans le graphe");
-//    }
-//
-//    const Heure heureDepart = p_gtfs.getTempsDebut();
-//    m_nbArcsStationsVersDestination = 0;
-//    m_nbArcsOrigineVersStations = 0;
-//
-//    // On crée des Arrets pointeurs pour l'origine et la destination
-//    Arret::Ptr pointOrigine = make_shared<Arret>(stationIdOrigine, heureDepart, Heure(2, 0, 0), 0, "ORIGINE");
-//    Arret::Ptr pointDestination = make_shared<Arret>(stationIdDestination, heureDepart, Heure(2, 0, 0), 0,
-//                                                     "DESTINATION");
-//
-//    m_leGraphe.resize(m_leGraphe.getNbSommets() + 2);
-//
-//    m_sommetOrigine = m_leGraphe.getNbSommets() - 2;
-//    m_sommetDestination = m_leGraphe.getNbSommets() - 1;
-//
-//    // Ajouts des sommets dans le graphe
-//    m_arretDuSommet.push_back(pointOrigine);
-//    m_arretDuSommet.push_back(pointDestination);
-//
-//    m_sommetDeArret.insert({pointOrigine, m_sommetOrigine});
-//    m_sommetDeArret.insert({pointDestination, m_sommetDestination});
-//
-//
-//    const map<unsigned int, Station> &m_stations = p_gtfs.getStations();
-//
-//    for (auto station = m_stations.begin(); station != m_stations.end(); ++station) {
-//        const Coordonnees &coordStation = station->second.getCoords();
-//
-//        double distanceMarcheOrigine = p_pointOrigine - coordStation;
-//        double distanceMarcheDestination = p_pointDestination - coordStation;
-//
-//        if (distanceMarcheOrigine < distanceMaxMarche) {
-//            const multimap<Heure, Arret::Ptr> &arretsStation = station->second.getArrets();
-//
-//            unsigned int secondesMarche = ((distanceMarcheOrigine / vitesseDeMarche) * 3600);
-//            Heure tempsMarcheOrigine = heureDepart.add_secondes(secondesMarche);
-//
-//            multimap<Heure, Arret::Ptr>::const_iterator arretAccessible = arretsStation.lower_bound(tempsMarcheOrigine);
-//
-//            if (arretAccessible != arretsStation.end()) {
-//                m_leGraphe.ajouterArc(m_sommetOrigine, m_sommetDeArret[(*arretAccessible).second],
-//                                      (*arretAccessible).first - heureDepart);
-//                ++m_nbArcsOrigineVersStations;
-//            }
-//        }
-//        if (distanceMarcheDestination < distanceMaxMarche) {
-//            const multimap<Heure, Arret::Ptr> &arretsStation = station->second.getArrets();
-//
-//            unsigned int tempsMarcheDestination = (distanceMarcheDestination / vitesseDeMarche) * 3600;
-//
-//            for (auto arret = arretsStation.begin(); arret != arretsStation.end(); ++arret) {
-//                size_t sommetArret = m_sommetDeArret[(*arret).second];
-//
-//                m_leGraphe.ajouterArc(sommetArret, m_sommetDestination, tempsMarcheDestination);
-//                m_sommetsVersDestination.push_back(sommetArret);
-//                ++m_nbArcsStationsVersDestination;
-//            }
-//        }
-//    }
-//
-//    if (m_nbArcsStationsVersDestination == 0 or m_nbArcsOrigineVersStations == 0){
-//        throw logic_error("Aucun arrêt de bus n'est dans le rayon maximal de marche de la destination ou de l'origine");
-//    }
-//
-//    // On indique que que les arcs origine/destination ont été ajoutés
-//    m_origine_dest_ajoute = true;
 
 }
 
@@ -340,33 +256,25 @@ void ReseauGTFS::ajouterArcsOrigineDestination(const DonneesGTFS &p_gtfs, const 
 //! \post enlève les données de m_sommetsVersDestination
 void ReseauGTFS::enleverArcsOrigineDestination()
 {
-    if (m_origine_dest_ajoute == false)
+    if (!m_origine_dest_ajoute)
     {
-        throw logic_error("Il n'y a pas d'arcs d'origine et de destination dans le graphe");
+        throw logic_error("Les acrs de l'origine sont deja presents dans le graphe");
     }
 
-    for (auto sommet = m_sommetsVersDestination.begin(); sommet != m_sommetsVersDestination.end(); ++sommet) {
-        m_leGraphe.enleverArc(*sommet, m_sommetDestination);
+    for(auto i = m_sommetsVersDestination.begin(); i != m_sommetsVersDestination.end(); i++)
+    {
+        m_leGraphe.enleverArc(*i, m_sommetDestination);
     }
+
     m_leGraphe.resize(m_leGraphe.getNbSommets() - 2);
-
-    // Allons chercher les pointeurs des sommets Origine et Destination
-    Arret::Ptr sommetOrigine = m_arretDuSommet[m_sommetOrigine];
-    Arret::Ptr sommetDestination = m_arretDuSommet[m_sommetDestination];
-
-    // Suppression m_sommetDeArret
-    m_sommetDeArret.erase(sommetOrigine);
-    m_sommetDeArret.erase(sommetDestination);
-
-    // Suppression des sommets dans m_arretDuSommet
+    m_sommetDeArret.erase(m_arretDuSommet[m_sommetOrigine]);
+    m_sommetDeArret.erase(m_arretDuSommet[m_sommetDestination]);
     m_arretDuSommet.pop_back();
     m_arretDuSommet.pop_back();
-
-    // Mise à jour des paramètres du graphe
     m_nbArcsOrigineVersStations = 0;
     m_nbArcsStationsVersDestination = 0;
-    m_sommetsVersDestination.clear();
     m_origine_dest_ajoute = false;
+
 }
 
 
