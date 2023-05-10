@@ -1,5 +1,4 @@
 //
-// Created by Mario Marchand on 16-12-30.
 //
 
 #include "ReseauGTFS.h"
