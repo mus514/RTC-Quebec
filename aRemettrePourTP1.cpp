@@ -1,9 +1,6 @@
-//
-// Created by Mario Marchand on 16-12-29.
-//
 
 //
-// Mustapha BOUHSEN
+// Mustapha
 // TP-1
 //
 
