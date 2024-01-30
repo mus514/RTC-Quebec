@@ -2,8 +2,6 @@
 //  Graphe.h
 //  Classe pour graphes orientés pondérés (non négativement) avec listes d'adjacence
 //
-//  Mario Marchand automne 2016.
-//
 
 #ifndef GRAPH_H
 #define GRAPH_H
